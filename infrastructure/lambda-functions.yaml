@@ -1,0 +1,279 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Lambda Functions for E-commerce Website'
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: 'mini-ecommerce'
+    Description: 'Name of the project'
+  
+  Environment:
+    Type: String
+    Default: 'dev'
+    AllowedValues: ['dev', 'staging', 'prod']
+    Description: 'Environment name'
+
+Resources:
+  # IAM Role for Lambda Functions
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-${Environment}-lambda-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+        - arn:aws:iam::aws:policy/AmazonSNSFullAccess
+      Policies:
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+
+  # Lambda Function for Order Processing
+  OrderProcessingFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${ProjectName}-${Environment}-order-processing'
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          DYNAMODB_TABLE: !Sub '${ProjectName}-orders'
+          SNS_TOPIC_ARN: !Sub 'arn:aws:sns:${AWS::Region}:${AWS::AccountId}:${ProjectName}-${Environment}-alerts'
+      Code:
+        ZipFile: |
+          const AWS = require('aws-sdk');
+          const dynamodb = new AWS.DynamoDB.DocumentClient();
+          const sns = new AWS.SNS();
+
+          exports.handler = async (event) => {
+              console.log('Processing order:', JSON.stringify(event, null, 2));
+              
+              try {
+                  // Process order data
+                  const order = JSON.parse(event.Records[0].body);
+                  
+                  // Save order to DynamoDB
+                  const params = {
+                      TableName: process.env.DYNAMODB_TABLE,
+                      Item: {
+                          orderId: order.orderId,
+                          customerId: order.customerId,
+                          items: order.items,
+                          total: order.total,
+                          status: 'processing',
+                          createdAt: new Date().toISOString()
+                      }
+                  };
+                  
+                  await dynamodb.put(params).promise();
+                  
+                  // Send notification
+                  await sns.publish({
+                      TopicArn: process.env.SNS_TOPIC_ARN,
+                      Message: `New order received: ${order.orderId}`,
+                      Subject: 'New E-commerce Order'
+                  }).promise();
+                  
+                  return {
+                      statusCode: 200,
+                      body: JSON.stringify({ message: 'Order processed successfully' })
+                  };
+              } catch (error) {
+                  console.error('Error processing order:', error);
+                  throw error;
+              }
+          };
+
+  # Lambda Function for Inventory Management
+  InventoryFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${ProjectName}-${Environment}-inventory-management'
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          PRODUCTS_TABLE: !Sub '${ProjectName}-products'
+      Code:
+        ZipFile: |
+          const AWS = require('aws-sdk');
+          const dynamodb = new AWS.DynamoDB.DocumentClient();
+
+          exports.handler = async (event) => {
+              console.log('Managing inventory:', JSON.stringify(event, null, 2));
+              
+              try {
+                  const { productId, quantity, operation } = event;
+                  
+                  // Get current product
+                  const getParams = {
+                      TableName: process.env.PRODUCTS_TABLE,
+                      Key: { productId }
+                  };
+                  
+                  const result = await dynamodb.get(getParams).promise();
+                  const product = result.Item;
+                  
+                  if (!product) {
+                      throw new Error('Product not found');
+                  }
+                  
+                  // Update inventory
+                  let newStock = product.stock || 0;
+                  if (operation === 'decrease') {
+                      newStock = Math.max(0, newStock - quantity);
+                  } else if (operation === 'increase') {
+                      newStock += quantity;
+                  }
+                  
+                  // Update product in database
+                  const updateParams = {
+                      TableName: process.env.PRODUCTS_TABLE,
+                      Key: { productId },
+                      UpdateExpression: 'SET stock = :stock, updatedAt = :updatedAt',
+                      ExpressionAttributeValues: {
+                          ':stock': newStock,
+                          ':updatedAt': new Date().toISOString()
+                      }
+                  };
+                  
+                  await dynamodb.update(updateParams).promise();
+                  
+                  return {
+                      statusCode: 200,
+                      body: JSON.stringify({ 
+                          productId, 
+                          newStock,
+                          message: 'Inventory updated successfully' 
+                      })
+                  };
+              } catch (error) {
+                  console.error('Error managing inventory:', error);
+                  throw error;
+              }
+          };
+
+  # Lambda Function for Data Analytics
+  AnalyticsFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${ProjectName}-${Environment}-analytics'
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Timeout: 60
+      MemorySize: 512
+      Environment:
+        Variables:
+          ORDERS_TABLE: !Sub '${ProjectName}-orders'
+          PRODUCTS_TABLE: !Sub '${ProjectName}-products'
+      Code:
+        ZipFile: |
+          const AWS = require('aws-sdk');
+          const dynamodb = new AWS.DynamoDB.DocumentClient();
+
+          exports.handler = async (event) => {
+              console.log('Generating analytics:', JSON.stringify(event, null, 2));
+              
+              try {
+                  // Get all orders
+                  const ordersParams = {
+                      TableName: process.env.ORDERS_TABLE
+                  };
+                  
+                  const orders = await dynamodb.scan(ordersParams).promise();
+                  
+                  // Calculate analytics
+                  const analytics = {
+                      totalOrders: orders.Items.length,
+                      totalRevenue: orders.Items.reduce((sum, order) => sum + (order.total || 0), 0),
+                      averageOrderValue: 0,
+                      topProducts: {},
+                      recentOrders: orders.Items
+                          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                          .slice(0, 10)
+                  };
+                  
+                  analytics.averageOrderValue = analytics.totalOrders > 0 
+                      ? analytics.totalRevenue / analytics.totalOrders 
+                      : 0;
+                  
+                  // Count product sales
+                  orders.Items.forEach(order => {
+                      if (order.items) {
+                          order.items.forEach(item => {
+                              analytics.topProducts[item.productId] = 
+                                  (analytics.topProducts[item.productId] || 0) + item.quantity;
+                          });
+                      }
+                  });
+                  
+                  return {
+                      statusCode: 200,
+                      body: JSON.stringify(analytics)
+                  };
+              } catch (error) {
+                  console.error('Error generating analytics:', error);
+                  throw error;
+              }
+          };
+
+  # EventBridge Rule for Scheduled Analytics
+  AnalyticsScheduleRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub '${ProjectName}-${Environment}-analytics-schedule'
+      Description: 'Trigger analytics function daily'
+      ScheduleExpression: 'rate(1 day)'
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt AnalyticsFunction.Arn
+          Id: 'AnalyticsTarget'
+
+  # Permission for EventBridge to invoke Lambda
+  AnalyticsInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref AnalyticsFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt AnalyticsScheduleRule.Arn
+
+Outputs:
+  OrderProcessingFunctionArn:
+    Description: 'ARN of the Order Processing Lambda Function'
+    Value: !GetAtt OrderProcessingFunction.Arn
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-order-processing-function'
+
+  InventoryFunctionArn:
+    Description: 'ARN of the Inventory Management Lambda Function'
+    Value: !GetAtt InventoryFunction.Arn
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-inventory-function'
+
+  AnalyticsFunctionArn:
+    Description: 'ARN of the Analytics Lambda Function'
+    Value: !GetAtt AnalyticsFunction.Arn
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-analytics-function'

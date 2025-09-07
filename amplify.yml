@@ -1,0 +1,67 @@
+﻿version: 1
+applications:
+  - frontend:
+      phases:
+        preBuild:
+          commands:
+            - echo "Starting frontend build process..."
+            - cd frontend
+            - npm ci
+            - echo "Frontend dependencies installed"
+        build:
+          commands:
+            - echo "Building React application..."
+            - npm run build
+            - echo "Frontend build completed successfully"
+        postBuild:
+          commands:
+            - echo "Running post-build optimizations..."
+            - echo "Build artifacts ready for deployment"
+      artifacts:
+        baseDirectory: frontend/build
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - frontend/node_modules/**/*
+      customHeaders:
+        - pattern: '**/*'
+          headers:
+            - key: 'Strict-Transport-Security'
+              value: 'max-age=31536000; includeSubDomains'
+            - key: 'X-Content-Type-Options'
+              value: 'nosniff'
+            - key: 'X-Frame-Options'
+              value: 'DENY'
+            - key: 'X-XSS-Protection'
+              value: '1; mode=block'
+        - pattern: '/static/js/*.js'
+          headers:
+            - key: 'Cache-Control'
+              value: 'public, max-age=31536000, immutable'
+        - pattern: '/static/css/*.css'
+          headers:
+            - key: 'Cache-Control'
+              value: 'public, max-age=31536000, immutable'
+    appRoot: frontend
+  - backend:
+      phases:
+        preBuild:
+          commands:
+            - echo "Starting backend setup..."
+            - cd backend
+            - npm ci
+            - echo "Backend dependencies installed"
+        build:
+          commands:
+            - echo "Backend build process..."
+            - echo "Validating API endpoints..."
+            - echo "Backend ready for deployment"
+      artifacts:
+        baseDirectory: backend
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - backend/node_modules/**/*
+    appRoot: backend

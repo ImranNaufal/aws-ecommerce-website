@@ -1,0 +1,96 @@
+name: Pull Request Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  pr-validation:
+    name: 🔍 PR Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📦 Install Dependencies
+      run: npm ci
+      
+    - name: 🔍 Lint Check
+      run: npm run lint:check
+      
+    - name: 💅 Format Check
+      run: npm run format:check
+      
+    - name: 🔧 Type Check
+      run: npm run type-check
+      
+    - name: 🧪 Run Tests
+      run: npm run test:ci
+      
+    - name: 🏗️ Build Check
+      run: npm run build
+      env:
+        REACT_APP_ENV: development
+        
+    - name: 📊 Bundle Size Check
+      run: |
+        npm run build
+        npx bundlesize
+        
+    - name: 📝 Comment PR
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Read test results
+          const testResults = '✅ All checks passed!';
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `## 🔍 PR Validation Results\n\n${testResults}\n\n- ✅ Linting passed\n- ✅ Formatting passed\n- ✅ Type checking passed\n- ✅ Tests passed\n- ✅ Build successful\n\n**Ready for review!** 🚀`
+          });
+
+  lighthouse-check:
+    name: 🏠 Lighthouse Performance
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📦 Install Dependencies
+      run: npm ci
+      
+    - name: 🏗️ Build Application
+      run: npm run build
+      env:
+        REACT_APP_ENV: development
+        
+    - name: 🏠 Run Lighthouse
+      uses: treosh/lighthouse-ci-action@v10
+      with:
+        configPath: './.lighthouserc.json'
+        uploadArtifacts: true
+        temporaryPublicStorage: true

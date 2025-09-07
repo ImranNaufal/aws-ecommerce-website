@@ -1,0 +1,214 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  AWS_REGION: ap-southeast-1
+  NODE_VERSION: '18'
+
+jobs:
+  # Job 1: Code Quality & Testing
+  quality-check:
+    name: Code Quality & Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📦 Install Dependencies
+      run: npm ci
+      
+    - name: 🔍 Run ESLint
+      run: npm run lint:check
+      
+    - name: 💅 Check Prettier
+      run: npm run format:check
+      
+    - name: 🔧 TypeScript Check
+      run: npm run type-check
+      
+    - name: 🧪 Run Tests
+      run: npm run test:ci
+      
+    - name: 📊 Upload Coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+
+  # Job 2: Security Scan
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🔒 Run Security Audit
+      run: npm audit --audit-level high
+      
+    - name: 🛡️ Snyk Security Scan
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high
+
+  # Job 3: Build Application
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [quality-check, security-scan]
+    
+    strategy:
+      matrix:
+        environment: [development, production]
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 🟢 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        
+    - name: 📦 Install Dependencies
+      run: npm ci
+      
+    - name: 🏗️ Build Application
+      run: npm run build
+      env:
+        REACT_APP_ENV: ${{ matrix.environment }}
+        REACT_APP_VERSION: ${{ github.sha }}
+        REACT_APP_BUILD_NUMBER: ${{ github.run_number }}
+        REACT_APP_DEPLOY_TIME: ${{ github.event.head_commit.timestamp }}
+        
+    - name: 📤 Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-${{ matrix.environment }}
+        path: build/
+        retention-days: 30
+
+  # Job 4: Deploy to Development
+  deploy-dev:
+    name: 🚀 Deploy to Development
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/develop'
+    environment: 
+      name: development
+      url: ${{ secrets.DEV_WEBSITE_URL }}
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 📥 Download Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-development
+        path: build/
+        
+    - name: ⚙️ Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+        
+    - name: 🪣 Deploy to S3
+      run: |
+        echo "🚀 Deploying to Development S3..."
+        aws s3 sync build/ s3://${{ secrets.DEV_S3_BUCKET }} --delete --exact-timestamps
+        aws s3 cp build/index.html s3://${{ secrets.DEV_S3_BUCKET }}/index.html --cache-control "no-cache, no-store, must-revalidate"
+        
+    - name: ⚡ Invalidate CloudFront
+      run: |
+        echo "⚡ Invalidating CloudFront cache..."
+        aws cloudfront create-invalidation --distribution-id ${{ secrets.DEV_CLOUDFRONT_ID }} --paths "/*"
+        
+    - name: 🔍 Health Check
+      run: |
+        echo "🔍 Running health check..."
+        sleep 30
+        curl -f ${{ secrets.DEV_WEBSITE_URL }} || exit 1
+        echo "✅ Development deployment successful!"
+
+  # Job 5: Deploy to Production
+  deploy-prod:
+    name: 🚀 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    environment: 
+      name: production
+      url: ${{ secrets.PROD_WEBSITE_URL }}
+    
+    steps:
+    - name: 📥 Checkout Code
+      uses: actions/checkout@v4
+      
+    - name: 📥 Download Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-production
+        path: build/
+        
+    - name: ⚙️ Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+        
+    - name: 🪣 Deploy to S3
+      run: |
+        echo "🚀 Deploying to Production S3..."
+        aws s3 sync build/ s3://${{ secrets.PROD_S3_BUCKET }} --delete --exact-timestamps
+        aws s3 cp build/index.html s3://${{ secrets.PROD_S3_BUCKET }}/index.html --cache-control "no-cache, no-store, must-revalidate"
+        
+    - name: ⚡ Invalidate CloudFront
+      run: |
+        echo "⚡ Invalidating CloudFront cache..."
+        aws cloudfront create-invalidation --distribution-id ${{ secrets.PROD_CLOUDFRONT_ID }} --paths "/*"
+        
+    - name: 🔍 Health Check
+      run: |
+        echo "🔍 Running health check..."
+        sleep 30
+        curl -f ${{ secrets.PROD_WEBSITE_URL }} || exit 1
+        echo "✅ Production deployment successful!"
+        
+    - name: 📢 Notify Success
+      uses: 8398a7/action-slack@v3
+      with:
+        status: success
+        channel: '#deployments'
+        text: '🎉 Production deployment successful!'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      if: success()
+      
+    - name: 📢 Notify Failure
+      uses: 8398a7/action-slack@v3
+      with:
+        status: failure
+        channel: '#deployments'
+        text: '❌ Production deployment failed!'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      if: failure()

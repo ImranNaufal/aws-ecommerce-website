@@ -1,0 +1,267 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'API Gateway for E-commerce Website'
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: 'mini-ecommerce'
+    Description: 'Name of the project'
+  
+  Environment:
+    Type: String
+    Default: 'dev'
+    AllowedValues: ['dev', 'staging', 'prod']
+    Description: 'Environment name'
+
+  EC2InstanceIP:
+    Type: String
+    Description: 'Private IP address of the EC2 instance running the backend'
+    Default: '10.0.1.100'
+
+Resources:
+  # API Gateway REST API
+  EcommerceAPI:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub '${ProjectName}-${Environment}-api'
+      Description: 'API Gateway for E-commerce Website'
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      Policy:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: '*'
+            Action: 'execute-api:Invoke'
+            Resource: '*'
+
+  # API Gateway Deployment
+  APIDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - ProductsMethod
+      - CartMethod
+      - OrdersMethod
+    Properties:
+      RestApiId: !Ref EcommerceAPI
+      StageName: !Ref Environment
+
+  # Products Resource
+  ProductsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref EcommerceAPI
+      ParentId: !GetAtt EcommerceAPI.RootResourceId
+      PathPart: 'products'
+
+  # Products Method (GET)
+  ProductsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref EcommerceAPI
+      ResourceId: !Ref ProductsResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: HTTP_PROXY
+        IntegrationHttpMethod: GET
+        Uri: !Sub 'http://${EC2InstanceIP}:3001/api/products'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # Cart Resource
+  CartResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref EcommerceAPI
+      ParentId: !GetAtt EcommerceAPI.RootResourceId
+      PathPart: 'cart'
+
+  # Cart Method (GET, POST, PUT, DELETE)
+  CartMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref EcommerceAPI
+      ResourceId: !Ref CartResource
+      HttpMethod: ANY
+      AuthorizationType: NONE
+      Integration:
+        Type: HTTP_PROXY
+        IntegrationHttpMethod: ANY
+        Uri: !Sub 'http://${EC2InstanceIP}:3001/api/cart/{proxy}'
+        RequestParameters:
+          integration.request.path.proxy: 'method.request.path.proxy'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      RequestParameters:
+        method.request.path.proxy: true
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # Orders Resource
+  OrdersResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref EcommerceAPI
+      ParentId: !GetAtt EcommerceAPI.RootResourceId
+      PathPart: 'orders'
+
+  # Orders Method (POST)
+  OrdersMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref EcommerceAPI
+      ResourceId: !Ref OrdersResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${OrderProcessingFunction}/invocations'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # Lambda Function for Order Processing (referenced)
+  OrderProcessingFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub '${ProjectName}-${Environment}-order-processing'
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          exports.handler = async (event) => {
+              return {
+                  statusCode: 200,
+                  headers: {
+                      'Access-Control-Allow-Origin': '*',
+                      'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({ message: 'Order processed successfully' })
+              };
+          };
+
+  # IAM Role for Lambda
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  # Permission for API Gateway to invoke Lambda
+  LambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref OrderProcessingFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${EcommerceAPI}/*/*'
+
+  # API Gateway Usage Plan
+  APIUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      UsagePlanName: !Sub '${ProjectName}-${Environment}-usage-plan'
+      Description: 'Usage plan for E-commerce API'
+      ApiStages:
+        - ApiId: !Ref EcommerceAPI
+          Stage: !Ref Environment
+      Throttle:
+        RateLimit: 1000
+        BurstLimit: 2000
+      Quota:
+        Limit: 10000
+        Period: DAY
+
+  # API Key
+  APIKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Name: !Sub '${ProjectName}-${Environment}-api-key'
+      Description: 'API Key for E-commerce Website'
+      Enabled: true
+
+  # Usage Plan Key
+  UsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      KeyId: !Ref APIKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref APIUsagePlan
+
+  # CloudWatch Log Group for API Gateway
+  APILogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/apigateway/${ProjectName}-${Environment}'
+      RetentionInDays: 14
+
+  # API Gateway Account (for CloudWatch Logs)
+  APIGatewayAccount:
+    Type: AWS::ApiGateway::Account
+    Properties:
+      CloudWatchRoleArn: !GetAtt APIGatewayCloudWatchRole.Arn
+
+  # IAM Role for API Gateway CloudWatch Logs
+  APIGatewayCloudWatchRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
+
+Outputs:
+  APIGatewayURL:
+    Description: 'URL of the API Gateway'
+    Value: !Sub 'https://${EcommerceAPI}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-api-url'
+
+  APIGatewayId:
+    Description: 'ID of the API Gateway'
+    Value: !Ref EcommerceAPI
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-api-id'
+
+  APIKeyId:
+    Description: 'ID of the API Key'
+    Value: !Ref APIKey
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-api-key-id'
+
+  UsagePlanId:
+    Description: 'ID of the Usage Plan'
+    Value: !Ref APIUsagePlan
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-usage-plan-id'
