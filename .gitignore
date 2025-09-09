@@ -8,6 +8,8 @@ node_modules/
 
 # Production
 /build
+/frontend/build/
+/backend/dist/
 
 # Environment variables
 .env
@@ -100,6 +102,25 @@ Thumbs.db
 # Misc
 *.log
 .cache/
+
+# Build artifacts and temporary files
+*.zip
+*.tar.gz
+
+# Lock files (can be regenerated)
+package-lock.json
+yarn.lock
+
+# Temporary documentation and files
+*_TEMP*
+*_BACKUP*
+GITHUB_*.md
+*_COMMANDS.txt
+*_CHECKLIST.md
+
+# Sample and test data
+sample-*.json
+test-data/
 .clinerules/byterover-rules.md
 .kilocode/rules/byterover-rules.md
 .roo/rules/byterover-rules.md
