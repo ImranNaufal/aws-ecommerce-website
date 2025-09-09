@@ -87,7 +87,7 @@ This project demonstrates **enterprise-level AWS infrastructure** for a complete
 
 <img width="3175" height="1199" alt="diagram-export-9-9-2025-3_25_40-PM" src="https://github.com/user-attachments/assets/5d442988-6a3a-4f0d-b676-59ffd3e35970" />
 
-```
+---
 
 ### **AWS Services Deployed**
 - **Amazon VPC**: Secure network infrastructure with public/private subnets
