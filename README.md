@@ -85,10 +85,7 @@ This project demonstrates **enterprise-level AWS infrastructure** for a complete
 
 ## 🏗️ **AWS Architecture Diagram**
 
-```
-
-<img width="3175" height="1199" alt="diagram-export-9-9-2025-3_25_40-PM" src="https://github.com/user-attachments/assets/fb070b22-5705-4cc8-ba97-262cdb28c790" />
-
+<img width="3175" height="1199" alt="diagram-export-9-9-2025-3_25_40-PM" src="https://github.com/user-attachments/assets/5d442988-6a3a-4f0d-b676-59ffd3e35970" />
 
 ```
 
