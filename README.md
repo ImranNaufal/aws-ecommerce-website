@@ -13,7 +13,13 @@
 
 > **Note**: Screenshots demonstrate the complete functionality of the deployed e-commerce platform
 
-*Screenshots showcase: Homepage, Product Catalog, Shopping Cart, Checkout Process, and AWS Infrastructure*
+<img width="1280" height="682" alt="image" src="https://github.com/user-attachments/assets/a8e45c18-9e8b-4b6b-a377-51f4425ac1a9" />
+<img width="1280" height="719" alt="image" src="https://github.com/user-attachments/assets/448b5d68-0952-405e-b69b-e3726a1f0f45" />
+<img width="1280" height="710" alt="image" src="https://github.com/user-attachments/assets/6c41e756-dae0-4657-8b09-2b237eef8984" />
+<img width="1280" height="684" alt="image" src="https://github.com/user-attachments/assets/cd82b5e2-c4fd-4ec3-9d9e-248918a502cb" />
+<img width="1280" height="714" alt="image" src="https://github.com/user-attachments/assets/0dbef1b1-b42f-4e89-b85e-acebf33336a6" />
+<img width="1280" height="714" alt="image" src="https://github.com/user-attachments/assets/35f8fa98-bd30-4585-908c-bc5dba072ab7" />
+<img width="1280" height="712" alt="image" src="https://github.com/user-attachments/assets/c07832cf-de6e-4624-a84d-3a07d36dbf08" />
 
 ---
 
@@ -82,28 +88,8 @@ This project demonstrates **enterprise-level AWS infrastructure** for a complete
 ## 🏗️ **AWS Architecture Diagram**
 
 ```
-                    ┌─────────────────────────────────────┐
-                    │           AWS Cloud                 │
-                    │                                     │
-    ┌─────────────────────────────────────────────────────────────┐
-    │                    VPC (10.0.0.0/16)                       │
-    │                                                             │
-    │  ┌─────────────────┐    ┌─────────────────┐                │
-    │  │  Public Subnet  │    │ Private Subnet  │                │
-    │  │                 │    │                 │                │
-    │  │  ┌───────────┐  │    │  ┌───────────┐  │                │
-    │  │  │    EC2    │  │    │  │ DynamoDB  │  │                │
-    │  │  │ Backend   │◄─┼────┼─►│ Database  │  │                │
-    │  │  │ Server    │  │    │  │           │  │                │
-    │  │  └───────────┘  │    │  └───────────┘  │                │
-    │  └─────────────────┘    └─────────────────┘                │
-    └─────────────────────────────────────────────────────────────┘
-                    │
-    ┌─────────────────────────────────────────────────────────────┐
-    │                    S3 Bucket                                │
-    │              Static Website Hosting                         │
-    │                 React Frontend                              │
-    └─────────────────────────────────────────────────────────────┘
+<img width="3175" height="1199" alt="diagram-export-9-9-2025-3_25_40-PM" src="https://github.com/user-attachments/assets/821ceefd-6608-4bd6-bc4d-99ece29f8fd3" />
+
 ```
 
 ### **AWS Services Deployed**
