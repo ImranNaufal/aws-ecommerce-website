@@ -18,7 +18,7 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE_URL = process.env.REACT_APP_API_ENDPOINT || 'http://localhost:3001';
+  const API_BASE_URL = process.env.REACT_APP_API_ENDPOINT || 'http://54.255.128.152:3001';
 
   useEffect(() => {
     const fetchHomeData = async () => {

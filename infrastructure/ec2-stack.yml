@@ -1,0 +1,285 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'EC2 Infrastructure Stack for E-commerce Backend'
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: 'mini-ecommerce'
+    Description: 'Name of the project'
+  
+  Environment:
+    Type: String
+    Default: 'dev'
+    AllowedValues: ['dev', 'staging', 'prod']
+    Description: 'Environment name'
+
+  KeyPairName:
+    Type: String
+    Description: 'EC2 Key Pair name for SSH access'
+    Default: 'mini-ecommerce-keypair'
+
+Resources:
+  # IAM Role for EC2
+  EC2Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${ProjectName}-${Environment}-ec2-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                  - dynamodb:BatchGetItem
+                  - dynamodb:BatchWriteItem
+                Resource: '*'
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource: '*'
+
+  # Instance Profile
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref EC2Role
+
+  # EC2 Instance for Backend
+  BackendInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-047126e50991d067b  # Amazon Linux 2023 in ap-southeast-1
+      InstanceType: t3.micro
+      KeyName: !Ref KeyPairName
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      SubnetId: 
+        Fn::ImportValue: !Sub '${ProjectName}-${Environment}-public-subnet-id'
+      SecurityGroupIds:
+        - Fn::ImportValue: !Sub '${ProjectName}-${Environment}-ec2-sg-id'
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          
+          # Install Node.js 18
+          curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
+          yum install -y nodejs
+          
+          # Install PM2 for process management
+          npm install -g pm2
+          
+          # Install CloudWatch agent
+          yum install -y amazon-cloudwatch-agent
+          
+          # Create app directory
+          mkdir -p /opt/ecommerce-backend
+          cd /opt/ecommerce-backend
+          
+          # Create a simple backend server
+          cat > server.js << 'EOF'
+          const express = require('express');
+          const cors = require('cors');
+          const AWS = require('aws-sdk');
+          
+          const app = express();
+          const port = 3001;
+          
+          // Configure AWS
+          AWS.config.update({
+            region: '${AWS::Region}'
+          });
+          
+          const dynamodb = new AWS.DynamoDB.DocumentClient();
+          
+          // Middleware
+          app.use(cors());
+          app.use(express.json());
+          
+          // Sample products data
+          const sampleProducts = [
+            {
+              productId: 'prod-001',
+              name: 'Premium Laptop',
+              description: 'High-performance laptop with latest specs and premium build quality',
+              price: 999.99,
+              category: 'Electronics',
+              imageUrl: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              isActive: true
+            },
+            {
+              productId: 'prod-002',
+              name: 'Smart Fitness Watch',
+              description: 'Advanced fitness tracker with heart rate monitoring and GPS',
+              price: 299.99,
+              category: 'Electronics',
+              imageUrl: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              isActive: true
+            },
+            {
+              productId: 'prod-003',
+              name: 'Wireless Bluetooth Headphones',
+              description: 'Premium noise-cancelling wireless headphones with 30-hour battery life',
+              price: 199.99,
+              category: 'Electronics',
+              imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              isActive: true
+            },
+            {
+              productId: 'prod-004',
+              name: 'Organic Cotton T-Shirt',
+              description: 'Comfortable 100% organic cotton t-shirt available in multiple colors',
+              price: 29.99,
+              category: 'Clothing',
+              imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              isActive: true
+            },
+            {
+              productId: 'prod-005',
+              name: 'Professional Coffee Maker',
+              description: '12-cup programmable coffee maker with thermal carafe',
+              price: 149.99,
+              category: 'Home & Kitchen',
+              imageUrl: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              isActive: true
+            },
+            {
+              productId: 'prod-006',
+              name: 'Gaming Mechanical Keyboard',
+              description: 'RGB backlit mechanical gaming keyboard with blue switches',
+              price: 129.99,
+              category: 'Electronics',
+              imageUrl: 'https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              isActive: true
+            },
+            {
+              productId: 'prod-007',
+              name: 'Bluetooth Speaker Portable',
+              description: 'Waterproof portable Bluetooth speaker with 20-hour battery',
+              price: 79.99,
+              category: 'Electronics',
+              imageUrl: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              isActive: true
+            },
+            {
+              productId: 'prod-008',
+              name: 'Yoga Mat Premium',
+              description: 'Non-slip premium yoga mat with carrying strap',
+              price: 49.99,
+              category: 'Sports',
+              imageUrl: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400',
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+              isActive: true
+            }
+          ];
+          
+          // Routes
+          app.get('/health', (req, res) => {
+            res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+          });
+          
+          app.get('/api/products', (req, res) => {
+            console.log('Products endpoint called');
+            res.json({
+              success: true,
+              data: sampleProducts
+            });
+          });
+          
+          app.listen(port, '0.0.0.0', () => {
+            console.log('E-commerce backend server running on port ' + port);
+          });
+          EOF
+          
+          # Create package.json
+          cat > package.json << 'EOF'
+          {
+            "name": "ecommerce-backend",
+            "version": "1.0.0",
+            "description": "E-commerce backend API",
+            "main": "server.js",
+            "scripts": {
+              "start": "node server.js"
+            },
+            "dependencies": {
+              "express": "^4.18.2",
+              "cors": "^2.8.5",
+              "aws-sdk": "^2.1490.0"
+            }
+          }
+          EOF
+          
+          # Install dependencies
+          npm install
+          
+          # Start the server with PM2
+          pm2 start server.js --name "ecommerce-backend"
+          pm2 startup
+          pm2 save
+          
+          # Configure PM2 to start on boot
+          env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -u ec2-user --hp /home/ec2-user
+          
+      Tags:
+        - Key: Name
+          Value: !Sub '${ProjectName}-${Environment}-backend'
+        - Key: Project
+          Value: !Ref ProjectName
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  BackendInstanceId:
+    Description: 'Backend EC2 Instance ID'
+    Value: !Ref BackendInstance
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-backend-instance-id'
+
+  BackendInstancePublicIP:
+    Description: 'Backend EC2 Instance Public IP'
+    Value: !GetAtt BackendInstance.PublicIp
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-backend-public-ip'
+
+  BackendInstancePrivateIP:
+    Description: 'Backend EC2 Instance Private IP'
+    Value: !GetAtt BackendInstance.PrivateIp
+    Export:
+      Name: !Sub '${ProjectName}-${Environment}-backend-private-ip'

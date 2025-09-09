@@ -16,7 +16,7 @@ Parameters:
   EC2InstanceIP:
     Type: String
     Description: 'Private IP address of the EC2 instance running the backend'
-    Default: '10.0.1.100'
+    Default: '10.0.1.236'
 
 Resources:
   # API Gateway REST API

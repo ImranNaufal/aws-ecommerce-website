@@ -108,7 +108,7 @@ function Deploy-Database {
         --parameter-overrides `
             ProjectName=$ProjectName `
             Environment=$Environment `
-        --capabilities CAPABILITY_IAM `
+        --capabilities CAPABILITY_NAMED_IAM `
         --region $AwsRegion
     
     if ($LASTEXITCODE -ne 0) {

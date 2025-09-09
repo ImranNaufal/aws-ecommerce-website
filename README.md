@@ -1,121 +1,119 @@
-# 🛍️ AWS E-commerce Website
+# 🛍️ AWS E-commerce Infrastructure
 
-**Professional full-stack e-commerce website built with React, Node.js, and complete AWS infrastructure.**
+**Enterprise-grade e-commerce platform with complete AWS cloud infrastructure, built using Infrastructure as Code principles.**
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-View%20Website-blue?style=for-the-badge)](http://mini-ecommerce-dev-website-834308799940.s3-website-ap-southeast-1.amazonaws.com)
 [![AWS](https://img.shields.io/badge/AWS-Cloud%20Infrastructure-orange?style=for-the-badge)](https://aws.amazon.com/)
 [![React](https://img.shields.io/badge/React-TypeScript-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=node.js)](https://nodejs.org/)
+[![CloudFormation](https://img.shields.io/badge/CloudFormation-Infrastructure%20as%20Code-FF9900?style=for-the-badge)](https://aws.amazon.com/cloudformation/)
 
 ---
 
-## 🌐 **Live Demo**
-**[🚀 View Live Website](http://mini-ecommerce-dev-website-834308799940.s3-website-ap-southeast-1.amazonaws.com)**
+## 📸 **Project Screenshots**
 
-*Complete e-commerce functionality with shopping cart, checkout, and AWS infrastructure*
+> **Note**: Screenshots demonstrate the complete functionality of the deployed e-commerce platform
+
+*Screenshots showcase: Homepage, Product Catalog, Shopping Cart, Checkout Process, and AWS Infrastructure*
 
 ---
 
 ## 📋 **Project Overview**
 
-This is a **production-ready e-commerce website** showcasing modern full-stack development with AWS cloud infrastructure. The project demonstrates enterprise-level architecture, clean code practices, and professional deployment strategies.
+This project demonstrates **enterprise-level AWS infrastructure** for a complete e-commerce platform. Built using Infrastructure as Code principles, it showcases professional cloud architecture, automated deployment, and scalable design patterns.
 
-### **🎯 Key Achievements**
-- ✅ **Complete E-commerce Platform** with shopping cart and checkout
-- ✅ **AWS Infrastructure as Code** using CloudFormation templates
-- ✅ **Professional UI/UX** with responsive design
-- ✅ **Production Deployment** on AWS with live demo
-- ✅ **Modern Tech Stack** with React TypeScript and Node.js
+### **🎯 Key Technical Achievements**
+- ✅ **Complete AWS Infrastructure** deployed via CloudFormation
+- ✅ **Multi-tier Architecture** (Frontend, Backend, Database)
+- ✅ **Infrastructure as Code** with automated deployment scripts
+- ✅ **Production-ready Security** with VPC, IAM roles, and Security Groups
+- ✅ **Scalable Design** with EC2, S3, DynamoDB integration
+- ✅ **Professional DevOps** practices with CI/CD ready templates
 
 ---
 
 ## 🛠️ **Technologies Used**
 
-### **Frontend**
-- **React 18** with TypeScript
-- **CSS3** with responsive design
-- **React Router** for navigation
+### **AWS Cloud Infrastructure**
+- **Amazon EC2** - Backend server hosting
+- **Amazon S3** - Static website hosting and file storage
+- **Amazon DynamoDB** - NoSQL database for scalable data storage
+- **Amazon VPC** - Secure network infrastructure
+- **AWS IAM** - Identity and access management
+- **AWS CloudFormation** - Infrastructure as Code templates
+
+### **Frontend Technologies**
+- **React 18** with TypeScript for type safety
+- **CSS3** with responsive design principles
+- **React Router** for client-side navigation
 - **Context API** for state management
 
-### **Backend**
-- **Node.js** with Express.js
-- **AWS SDK** for cloud integration
-- **RESTful APIs** for data operations
-- **PM2** for process management
+### **Backend Technologies**
+- **Node.js** with Express.js framework
+- **AWS SDK** for seamless cloud integration
+- **RESTful API** architecture
+- **PM2** for production process management
 
-### **Database**
-- **Amazon DynamoDB** for product and cart data
-- **NoSQL** data modeling
-- **AWS SDK** for database operations
-
-### **Infrastructure & Deployment**
-- **AWS CloudFormation** for Infrastructure as Code
-- **AWS Amplify** for CI/CD pipeline and hosting
-- **Amazon S3** for static website hosting
-- **Amazon EC2** for backend API hosting
-- **AWS CLI** for deployment automation
-
-### **Monitoring & Analytics**
-- **Amazon CloudWatch** for monitoring and logging
-- **AWS SNS** for notifications and alerts
-- **CloudWatch Dashboards** for real-time metrics
-- **Custom Metrics** for application performance
-
-### **Serverless & API Management**
-- **AWS Lambda** for serverless functions
-- **Amazon API Gateway** for API management
-- **EventBridge** for scheduled tasks
-- **Usage Plans** for API rate limiting
+### **DevOps & Deployment**
+- **Infrastructure as Code** with CloudFormation templates
+- **Automated Deployment** scripts for Windows/PowerShell
+- **Version Control** with Git integration
+- **Environment Management** (dev/staging/prod configurations)
 
 ---
 
-## ✨ **Features**
+## ✨ **Key Features**
 
-### **🛍️ E-commerce Functionality**
-- **Product Catalog**: 8 products across 4 categories
-- **Shopping Cart**: Add, remove, and modify quantities
-- **Checkout System**: Complete order processing flow
-- **Order Management**: Order confirmation and tracking
-- **Responsive Design**: Mobile-friendly interface
+### **🏗️ AWS Infrastructure**
+- **Multi-tier Architecture**: Separated frontend, backend, and database layers
+- **Scalable Design**: Auto-scaling ready with load balancer support
+- **Security Best Practices**: VPC isolation, IAM roles, Security Groups
+- **Cost Optimization**: Efficient resource allocation and monitoring
+- **High Availability**: Multi-AZ deployment ready
 
-### **🏗️ Technical Features**
-- **AWS Infrastructure**: Complete cloud architecture
-- **API Integration**: RESTful backend services
-- **State Management**: React Context for cart state
-- **Error Handling**: Graceful fallback systems
-- **Performance**: Optimized loading and caching
+### **🛍️ E-commerce Application**
+- **Product Management**: Dynamic product catalog with categories
+- **Shopping Cart**: Full cart functionality with persistent state
+- **User Interface**: Professional, responsive design
+- **API Integration**: RESTful services with error handling
+- **State Management**: React Context for application state
 
 ---
 
-## 🏗️ **Architecture**
+## 🏗️ **AWS Architecture Diagram**
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │    Backend      │    │   Database      │
-│   React SPA     │◄──►│   Node.js API   │◄──►│   DynamoDB      │
-│   (S3 Hosting)  │    │   (EC2 Server)  │    │   (NoSQL)       │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         └───────────────────────┼───────────────────────┘
-                                 │
-                    ┌─────────────────┐
-                    │ AWS CloudFormation │
-                    │ Infrastructure as Code │
-                    └─────────────────┘
+                    ┌─────────────────────────────────────┐
+                    │           AWS Cloud                 │
+                    │                                     │
+    ┌─────────────────────────────────────────────────────────────┐
+    │                    VPC (10.0.0.0/16)                       │
+    │                                                             │
+    │  ┌─────────────────┐    ┌─────────────────┐                │
+    │  │  Public Subnet  │    │ Private Subnet  │                │
+    │  │                 │    │                 │                │
+    │  │  ┌───────────┐  │    │  ┌───────────┐  │                │
+    │  │  │    EC2    │  │    │  │ DynamoDB  │  │                │
+    │  │  │ Backend   │◄─┼────┼─►│ Database  │  │                │
+    │  │  │ Server    │  │    │  │           │  │                │
+    │  │  └───────────┘  │    │  └───────────┘  │                │
+    │  └─────────────────┘    └─────────────────┘                │
+    └─────────────────────────────────────────────────────────────┘
+                    │
+    ┌─────────────────────────────────────────────────────────────┐
+    │                    S3 Bucket                                │
+    │              Static Website Hosting                         │
+    │                 React Frontend                              │
+    └─────────────────────────────────────────────────────────────┘
 ```
 
-### **AWS Services Used**
-- **Amplify**: CI/CD pipeline and hosting platform
-- **S3**: Static website hosting and file storage
-- **EC2**: Backend API server hosting
-- **DynamoDB**: NoSQL database for products and cart
-- **CloudFormation**: Infrastructure as Code templates
-- **IAM**: Security roles and permissions
-- **CloudWatch**: Monitoring, logging, and alerting
-- **SNS**: Email notifications and alerts
-- **Lambda**: Serverless functions for order processing
-- **API Gateway**: API management and rate limiting
-- **EventBridge**: Scheduled tasks and automation
+### **AWS Services Deployed**
+- **Amazon VPC**: Secure network infrastructure with public/private subnets
+- **Amazon EC2**: Backend API server (t3.micro instance)
+- **Amazon S3**: Static website hosting for React frontend
+- **Amazon DynamoDB**: NoSQL database (4 tables: Products, Users, Orders, Cart)
+- **AWS CloudFormation**: Infrastructure as Code (3 stacks)
+- **AWS IAM**: Security roles and policies
+- **Security Groups**: Network access control
 
 ---
 
@@ -136,128 +134,149 @@ aws-ecommerce-website/
 │   ├── 📄 server.js            # Express server configuration
 │   └── 📄 package.json         # Backend dependencies
 ├── 📁 infrastructure/           # AWS CloudFormation Templates
-│   ├── 📄 vpc-template.yaml    # Network infrastructure
-│   ├── 📄 ec2-template.yaml    # Server infrastructure
-│   └── 📄 s3-template.yaml     # Storage infrastructure
+│   ├── 📄 main-stack.yml       # VPC, S3, Security Groups
+│   ├── 📄 ec2-stack.yml        # EC2 instance and IAM roles
+│   ├── 📄 database-simple.yml  # DynamoDB tables
+│   └── 📄 monitoring-stack.yml # CloudWatch monitoring
 ├── 📁 scripts/                 # Deployment automation scripts
+│   ├── 📄 deploy-windows.ps1   # Complete deployment script
+│   ├── 📄 cleanup-aws-services.ps1 # Resource cleanup
+│   └── 📄 quick-cleanup.ps1    # Fast cleanup script
 ├── 📄 README.md                # Project documentation
-└── 📄 DEPLOYMENT_GUIDE.md      # Deployment instructions
+└── 📄 PROJECT_STRUCTURE.md     # Detailed project structure
 ```
 
 ---
 
-## 🚀 **Getting Started**
+## 🚀 **Deployment Guide**
 
 ### **Prerequisites**
-- Node.js 18+
-- AWS CLI configured
-- AWS Account with appropriate permissions
+- AWS CLI configured with appropriate permissions
+- PowerShell (for Windows deployment scripts)
+- Node.js 18+ (for local development)
+
+### **Quick Deployment**
+```powershell
+# Deploy complete infrastructure
+.\scripts\deploy-windows.ps1 -ProjectName "your-project" -Environment "dev" -AwsRegion "ap-southeast-1"
+```
+
+### **Manual Deployment Steps**
+```powershell
+# 1. Deploy main infrastructure (VPC, S3, Security Groups)
+aws cloudformation deploy --template-file infrastructure/main-stack.yml --stack-name "project-dev-infrastructure" --capabilities CAPABILITY_IAM
+
+# 2. Deploy database (DynamoDB tables)
+aws cloudformation deploy --template-file infrastructure/database-simple.yml --stack-name "project-dev-database"
+
+# 3. Deploy EC2 backend server
+aws cloudformation deploy --template-file infrastructure/ec2-stack.yml --stack-name "project-dev-ec2" --capabilities CAPABILITY_NAMED_IAM
+
+# 4. Build and deploy frontend
+cd frontend && npm run build
+aws s3 sync build/ s3://your-website-bucket --delete
+```
 
 ### **Local Development**
 ```bash
-# Clone the repository
-git clone https://github.com/YOUR_USERNAME/aws-ecommerce-website.git
-cd aws-ecommerce-website
+# Frontend development
+cd frontend && npm install && npm start
 
-# Install frontend dependencies
-cd frontend
-npm install
-npm start
-
-# Install backend dependencies (new terminal)
-cd ../backend
-npm install
-npm start
+# Backend development
+cd backend && npm install && npm start
 ```
 
-### **AWS Deployment**
-```bash
-# Deploy infrastructure
-aws cloudformation create-stack --stack-name ecommerce-infrastructure --template-body file://infrastructure/vpc-template.yaml
+### **Cleanup Resources**
+```powershell
+# Quick cleanup to stop AWS charges
+.\scripts\quick-cleanup.ps1
 
-# Deploy frontend
-cd frontend
-npm run build
-aws s3 sync build/ s3://your-bucket-name --delete
-
-# Deploy backend
-# (See DEPLOYMENT_GUIDE.md for complete instructions)
+# Complete cleanup with confirmation prompts
+.\scripts\cleanup-aws-services.ps1
 ```
 
 ---
 
-## 📊 **Project Statistics**
+## 📊 **Project Metrics**
 
-- **📁 Files Created**: 60+ files
-- **💻 Lines of Code**: 3,000+ lines
-- **🛠️ Components**: 15+ React components
-- **🌐 API Endpoints**: 15+ RESTful endpoints
-- **☁️ AWS Resources**: 25+ cloud resources
-- **⚡ Lambda Functions**: 3 serverless functions
-- **📊 Monitoring**: Complete CloudWatch setup
-- **📱 Responsive**: 100% mobile-friendly
+### **Infrastructure Scale**
+- **☁️ AWS Services**: 7+ core services deployed
+- **📊 CloudFormation Stacks**: 3 infrastructure stacks
+- **🗄️ Database Tables**: 4 DynamoDB tables
+- **🔐 Security**: VPC, IAM roles, Security Groups
+- **📈 Monitoring**: CloudWatch integration ready
 
----
-
-## 🎯 **Skills Demonstrated**
-
-### **Frontend Development**
-- React with TypeScript
-- Component-based architecture
-- State management with Context API
-- Responsive CSS design
-- Modern JavaScript (ES6+)
-
-### **Backend Development**
-- Node.js and Express.js
-- RESTful API design
-- Database integration
-- Error handling and validation
-- Server deployment and management
-
-### **Cloud & DevOps**
-- AWS infrastructure design
-- Infrastructure as Code (CloudFormation)
-- CI/CD pipeline implementation (Amplify)
-- Automated deployments from Git
-- Cloud deployment strategies
-- Performance optimization
-
-### **Professional Practices**
-- Clean code principles
-- Project organization
-- Documentation
-- Version control with Git
-- Production deployment
+### **Application Scale**
+- **📁 Total Files**: 50+ source files
+- **💻 Lines of Code**: 2,500+ lines
+- **🛠️ React Components**: 10+ reusable components
+- **🌐 API Endpoints**: RESTful backend architecture
+- **📱 Responsive Design**: Mobile-first approach
 
 ---
 
-## 🏆 **Professional Highlights**
+## 🎯 **Technical Skills Demonstrated**
 
-This project showcases **enterprise-level development skills** including:
+### **☁️ AWS Cloud Architecture**
+- **Infrastructure as Code**: CloudFormation templates for reproducible deployments
+- **Multi-tier Architecture**: Separated frontend, backend, and database layers
+- **Security Best Practices**: VPC isolation, IAM roles, Security Groups
+- **Scalable Design**: Auto-scaling ready infrastructure
+- **Cost Optimization**: Efficient resource allocation and cleanup automation
 
-- ✅ **Full-Stack Expertise**: Complete frontend and backend development
-- ✅ **Cloud Architecture**: Professional AWS infrastructure design
-- ✅ **Modern Technologies**: Latest React, Node.js, and TypeScript
-- ✅ **Production Deployment**: Live, scalable website
-- ✅ **Code Quality**: Clean, maintainable, documented code
-- ✅ **User Experience**: Professional, responsive design
+### **💻 Full-Stack Development**
+- **Frontend**: React 18 with TypeScript, responsive design, state management
+- **Backend**: Node.js/Express RESTful API with AWS SDK integration
+- **Database**: DynamoDB NoSQL design with proper indexing
+- **DevOps**: Automated deployment scripts and environment management
 
----
-
-## 📞 **Contact**
-
-**Imran Naufal**
-- 📧 Email: [your.email@example.com]
-- 💼 LinkedIn: [Your LinkedIn Profile]
-- 🌐 Portfolio: [Your Portfolio Website]
-
----
-
-## 📄 **License**
-
-This project is created for portfolio demonstration purposes.
+### **🛠️ Professional Development Practices**
+- **Version Control**: Git workflow with structured commits
+- **Documentation**: Comprehensive README and inline code documentation
+- **Code Organization**: Modular architecture with separation of concerns
+- **Error Handling**: Graceful fallbacks and user-friendly error messages
+- **Testing Ready**: Structure prepared for unit and integration testing
 
 ---
 
-**⭐ If you found this project impressive, please give it a star!**
+## 🏆 **Why This Project Stands Out**
+
+### **Enterprise-Ready Architecture**
+This project demonstrates **production-level AWS infrastructure** that scales from development to enterprise deployment. The multi-tier architecture, security implementation, and automated deployment showcase skills directly applicable to enterprise environments.
+
+### **Modern Development Stack**
+Built with the latest technologies and best practices:
+- **React 18 + TypeScript** for type-safe frontend development
+- **Node.js + Express** for scalable backend architecture
+- **AWS Cloud Services** for enterprise-grade infrastructure
+- **Infrastructure as Code** for reproducible deployments
+
+### **Professional Development Practices**
+- **Clean Code**: Well-organized, documented, and maintainable codebase
+- **Security First**: Proper IAM roles, VPC isolation, and security groups
+- **Cost Conscious**: Efficient resource usage with cleanup automation
+- **Documentation**: Comprehensive guides for deployment and maintenance
+
+---
+
+## � **Ready for Production**
+
+This infrastructure is designed to handle:
+- **High Traffic**: Auto-scaling ready architecture
+- **Security**: Enterprise-grade security practices
+- **Monitoring**: CloudWatch integration for production monitoring
+- **Maintenance**: Automated deployment and cleanup scripts
+
+---
+
+## 📄 **Portfolio Project**
+
+This project demonstrates comprehensive full-stack and cloud development skills suitable for:
+- **Senior Developer** positions
+- **Cloud Architect** roles
+- **DevOps Engineer** positions
+- **Full-Stack Engineer** opportunities
+
+---
+
+**⭐ Star this repository if you find the architecture and implementation impressive!**

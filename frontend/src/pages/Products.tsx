@@ -18,7 +18,7 @@ const Products: React.FC = () => {
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
 
   const { addToCart } = useCart();
-  const API_BASE_URL = process.env.REACT_APP_API_ENDPOINT || 'http://localhost:3001';
+  const API_BASE_URL = process.env.REACT_APP_API_ENDPOINT || 'http://54.255.128.152:3001';
 
   const handleAddToCart = async (product: Product) => {
     try {
