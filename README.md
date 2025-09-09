@@ -11,8 +11,6 @@
 
 ## 📸 **Project Screenshots**
 
-> **Note**: Screenshots demonstrate the complete functionality of the deployed e-commerce platform
-
 <img width="1280" height="682" alt="image" src="https://github.com/user-attachments/assets/a8e45c18-9e8b-4b6b-a377-51f4425ac1a9" />
 <img width="1280" height="719" alt="image" src="https://github.com/user-attachments/assets/448b5d68-0952-405e-b69b-e3726a1f0f45" />
 <img width="1280" height="710" alt="image" src="https://github.com/user-attachments/assets/6c41e756-dae0-4657-8b09-2b237eef8984" />
@@ -88,6 +86,7 @@ This project demonstrates **enterprise-level AWS infrastructure** for a complete
 ## 🏗️ **AWS Architecture Diagram**
 
 ```
+
 <img width="3175" height="1199" alt="diagram-export-9-9-2025-3_25_40-PM" src="https://github.com/user-attachments/assets/821ceefd-6608-4bd6-bc4d-99ece29f8fd3" />
 
 ```
