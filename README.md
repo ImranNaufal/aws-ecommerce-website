@@ -87,7 +87,8 @@ This project demonstrates **enterprise-level AWS infrastructure** for a complete
 
 ```
 
-<img width="3175" height="1199" alt="diagram-export-9-9-2025-3_25_40-PM" src="https://github.com/user-attachments/assets/821ceefd-6608-4bd6-bc4d-99ece29f8fd3" />
+<img width="3175" height="1199" alt="diagram-export-9-9-2025-3_25_40-PM" src="https://github.com/user-attachments/assets/fb070b22-5705-4cc8-ba97-262cdb28c790" />
+
 
 ```
 
